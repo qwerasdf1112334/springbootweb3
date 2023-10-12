@@ -46,7 +46,11 @@
       <el-table-column prop="path" label="路径" width="180" sortable>
       </el-table-column>
       <el-table-column prop="state" label="状态" width="180" sortable>
+        <template slot-scope="scope">
+          {{ scope.row.state === 1 ? '启用' : '禁用' }}
+        </template>
       </el-table-column>
+
 
 
 
@@ -109,8 +113,14 @@
         </el-form-item>
       </el-form>
       <el-form>
+<!--        <el-form-item label="状态" prop="state">-->
+<!--          <el-input v-model="saveForm.state" auto-complete="off"></el-input>-->
+<!--        </el-form-item>-->
         <el-form-item label="状态" prop="state">
-          <el-input v-model="saveForm.state" auto-complete="off"></el-input>
+          <el-radio-group v-model="saveForm.state">
+            <el-radio class="radio" :label="1">启用</el-radio>
+            <el-radio class="radio" :label="0">禁用</el-radio>
+          </el-radio-group>
         </el-form-item>
       </el-form>
 
@@ -172,7 +182,8 @@ export default {
         },
         parent:{
           id:null,
-          name:""
+          name:"",
+          path:"",
         },
         state:""
       },
@@ -287,6 +298,15 @@ export default {
       if(!assign.manager){
         this.saveForm.manager = {username:"",id:null}
       }
+      // 父级部门回显
+      if(this.saveForm.parent){
+        var split = this.saveForm.path.split("/");
+        var parents = []
+        for (let i = 1; i < split.length-1; i++) {
+          parents.push(parseInt(split[i]))
+        }
+        this.saveForm.parent = parents
+      }
       this.getAllEmployee()
       this.getDeptTree()
     },
@@ -349,6 +369,17 @@ export default {
     },
     // 新增或者是修改的方法
     saveOrUpdate(){
+      var parent = this.saveForm.parent;
+      if (parent){
+        this.saveForm.parent = {
+          id: parent[parent.length-1]
+        }
+      }else{
+        this.saveForm.parent = {
+          id: null
+        }
+      }
+
       this.$http.put("/dept",this.saveForm)
           .then(res =>{
             res = res.data
