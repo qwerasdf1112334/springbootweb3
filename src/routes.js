@@ -11,6 +11,7 @@ import Page6 from './views/nav3/Page6.vue'
 import echarts from './views/charts/echarts.vue'
 // 导入自己的组件
 import Department from "./views/org/Department";
+import OrgEmployee from "./views/org/OrgEmployee";
 
 let routes = [
     {
@@ -43,7 +44,7 @@ let routes = [
         iconCls: 'el-icon-message',//图标样式class
         children: [
             { path: '/department', component: Department, name: '部门管理' },
-            { path: '/employee', component: Department, name: '员工管理' },
+            { path: '/orgEmployee', component: OrgEmployee, name: '员工管理' },
         ]
     },
     {
