@@ -4,39 +4,28 @@
     <el-col :span="24" class="toolbar" style="padding-bottom: 0px;">
       <el-form :inline="true" :model="queryData">
         <el-form-item>
-          <el-input v-model="queryData.keyword" placeholder="员工姓名"></el-input>
+          <el-input v-model="queryData.keyword" placeholder="部门名称"></el-input>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" v-on:click="getOrgemployee">查询</el-button>
+          <el-button type="primary" v-on:click="getRoles">查询</el-button>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" @click="handleAdd">新增</el-button>
         </el-form-item>
       </el-form>
     </el-col>
-
-<!--    age-->
-<!--    :-->
-<!--    34-->
-<!--    departmentId-->
-<!--    :-->
-<!--    null-->
-<!--    email-->
-<!--    :-->
-<!--    "admin@ronghuanet.com"-->
-<!--    headImage-->
-<!--    :-->
-<!--    "/images/head/avatar.png"-->
-<!--    id-->
-<!--    :-->
-<!--    1-->
-<!--    password-->
-<!--    :-->
-<!--    "$2a$10$VUct.Y1WQ5XiP.GRZQafN.QDQua2wbRCPX3w/0dpCY4Y3svvSfCSm"-->
-<!--    username-->
-<!--    :-->
-<!--    "admin"-->
-
+    <!--
+      private Long id;
+      private String name;
+      private String intro;
+      private Date createTime;
+      private Date updateTime;
+      private Role manager;
+      private Role parent;
+      private String path;
+      private Integer state;
+    -->
+    <!--表格-->
     <!--
       users : tableData
       @selection-change="selsChange": 表格的多选列
@@ -52,30 +41,20 @@
       </el-table-column>
       <el-table-column type="index" width="60">
       </el-table-column>
-      <el-table-column prop="username" label="员工姓名" width="120" sortable>
+      <el-table-column prop="name" label="名称" width="120" sortable>
       </el-table-column>
 
-      <el-table-column prop="password" label="密码" width="180" sortable>
-      </el-table-column>
-      <el-table-column prop="age" label="年龄" width="180" sortable>
-      </el-table-column>
-      <el-table-column prop="id" label="ID" width="180" sortable>
+      <el-table-column prop="sn" label="sn" width="120" sortable>
       </el-table-column>
 
-      <el-table-column prop="email" label="邮箱" width="180" sortable>
-      </el-table-column>
-      <el-table-column prop="headImage" label="图片" width="180" sortable>
 
-      </el-table-column>
-      <el-table-column prop="departmentId" label="部门ID" width="180" sortable>
 
-      </el-table-column>
 
 
 
 
       <el-table-column label="操作" width="150">
-        <template scope="scope">
+        <template slot-scope="scope">
           <el-button size="small" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
           <el-button type="danger" size="small" @click="handleDel(scope.$index, scope.row)">删除</el-button>
         </template>
@@ -85,7 +64,8 @@
     <!--分页条和删除全部-->
     <el-col :span="24" class="toolbar">
       <el-button type="danger" @click="batchRemove" :disabled="this.sels.length===0">批量删除</el-button>
-      <el-pagination ref="pagination" layout="prev, pager, next" @current-change="handleCurrentChange" :page-size="queryData.pageSize" :total="pageInfo.total" style="float:right;">
+      <el-pagination layout="prev, pager, next" @current-change="handleCurrentChange" :page-size="queryData.pageSize"
+                     :total="pageInfo.total" style="float:right;">
       </el-pagination>
     </el-col>
 
@@ -103,16 +83,18 @@
         <el-form-item label="简介" prop="intro">
           <el-input v-model="saveForm.intro" auto-complete="off"></el-input>
         </el-form-item>
-        <el-form-item label="管理员" prop="manager">
+        <el-form-item label="部门主管" prop="manager">
           <el-select v-model="saveForm.manager" clearable value-key="id" placeholder="请选择">
             <!--下拉选项
-              :key=""  //唯一标识
-              :label 选择之后展示到选择框中的值
-              :value 选中之后绑定给模型层的值  如果要绑定对象给模型层 有一个大坑
-                 必须要写  value-key="id"
+              v-model="saveForm.manager"  我的下拉框绑定的是 管理员对象 而不是管理的id
+              clearable : 可清除的
+              roles : 员工数组
+              :key="item.id" 这个option的唯一标识符
+              :label="item.username" 下拉框显式的数据
+              :value="item" 就是整个对象
             -->
             <el-option
-                v-for="item in employees"
+                v-for="item in roles"
                 :key="item.id"
                 :label="item.username"
                 :value="item">
@@ -125,44 +107,20 @@
           <el-cascader v-model="saveForm.parent"
                        :options="deptTree"
                        :props="{
-                           checkStrictly: true,
-                           label:'name',
-                           value:'id'
+							   checkStrictly: true,
+							   label:'name',
+							   value:'id'
 							}"
                        clearable></el-cascader>
         </el-form-item>
-      </el-form>
-      <el-form>
-<!--        <el-form-item label="状态" prop="state">-->
-<!--          <el-input v-model="saveForm.state" auto-complete="off"></el-input>-->
-<!--        </el-form-item>-->
         <el-form-item label="状态" prop="state">
-          <el-radio-group v-model="saveForm.state">
-            <el-radio class="radio" :label="1">启用</el-radio>
-            <el-radio class="radio" :label="0">禁用</el-radio>
-          </el-radio-group>
+          <el-input v-model="saveForm.state" auto-complete="off"></el-input>
         </el-form-item>
       </el-form>
 
-      <!--
-      <el-form-item label="性别">
-					<el-radio-group v-model="addForm.sex">
-						<el-radio class="radio" :label="1">男</el-radio>
-						<el-radio class="radio" :label="0">女</el-radio>
-					</el-radio-group>
-				</el-form-item>
-				<el-form-item label="年龄">
-					<el-input-number v-model="addForm.age" :min="0" :max="200"></el-input-number>
-				</el-form-item>
-				<el-form-item label="生日">
-					<el-date-picker type="date" placeholder="选择日期" v-model="addForm.birth"></el-date-picker>
-				</el-form-item>
-				<el-form-item label="地址">
-					<el-input type="textarea" v-model="addForm.addr"></el-input>
-				</el-form-item>
-      -->
+
       <div slot="footer" class="dialog-footer">
-        <el-button @click.native="saveFormVisible = false">取消</el-button>
+        <el-button @click.native="addFormVisible = false">取消</el-button>
         <el-button type="primary" @click.native="addSubmit" :loading="addLoading">提交</el-button>
       </div>
     </el-dialog>
@@ -181,35 +139,37 @@ export default {
       queryData: {
         keyword: '',
         pageSize: 10,
-        currentPage:1
+        currentPage: 1
       },
-      pageInfo:{
+      pageInfo: {
         data: [],
         total: 0,
       },
       page: 1,
       listLoading: false,
       sels: [],//列表选中列
-
-      saveFormVisible:false,
-      saveForm:{
-        id:null,
-        name:"",
-        intro:"",
-        manager:{
-          id:null,
-          username:""
+      roles:[],
+      deptTree:[],
+      saveFormVisible: false,
+      saveForm: {
+        id: null,
+        name: "",
+        intro: "",
+        manager: {
+          id: null,
+          username: ""
         },
-        parent:{
-          id:null,
-          name:"",
+        parent: {
+          id: null,
+          name: "",
           path:"",
         },
-        state:""
+
+        state: ""
       },
       saveFormRules: {
         name: [
-          { required: true, message: '请输入部门名称', trigger: 'blur' }
+          {required: true, message: '请输入部门名称', trigger: 'blur'}
         ]
       },
       addFormVisible: false,//新增界面是否显示
@@ -222,59 +182,45 @@ export default {
         age: 0,
         birth: '',
         addr: ''
-      },
-      employees:[],
-      deptTree:[]
+      }
 
     }
   },
   methods: {
-    //查询部门树
-    getDeptTree(){
-      this.$http.get("/orgEmployee/tree").then(res=>{
-       res= res.data
+    // 获取上级部门列表
+    getParents(){
+      this.$http.get("/role/parent")
+          .then(res => {
+            res = res.data
+            if (res.success){
+              this.deptTree = res.data
+            }
 
-        if (res.success){
-          this.deptTree=res.data
-          console.log(res);
-        }
-
-
-      }).catch(res=>{
-        this.$message.error("没有查到部门树")
-      })
+          })
+          .catch(res => {
+          })
     },
-    //查询所有员工
-    getAllEmployee(){
-      this.$http.get("/employee").then(res=>{
-        res=res.data
-        this.employees=res.data
-
-      }).catch(res=>{
-        this.$message.error("查询员工失败")
-      })
-    },
-
+   
+   
     handleCurrentChange(val) {
       this.queryData.currentPage = val;
-      this.getOrgemployee();
+      this.getRoles();
     },
     //获取用户列表
-    getOrgemployee() {
+    getRoles() {
       // 获取参数 - currentPage pageSize keyword
       // 发起请求
-      this.$http.post("/orgEmployee",this.queryData)
-          .then(res =>{
-            res = res.data
+      this.$http.post("/role", this.queryData)
+          .then(res => {
             console.log(res)
-            if (res.success){
-
+            res = res.data
+            if (res.success) {
               this.pageInfo = res.data
-            }else{
+            } else {
               this.$message.error("网络异常请联系管理员");
             }
           })
-          .catch(res =>{
+          .catch(res => {
           })
     },
     //删除
@@ -285,44 +231,41 @@ export default {
         this.listLoading = true; // 加载框
         // 发送请求
         this.deletebyId(row.id)
-
       }).catch(() => {
 
       });
     },
     // 删除单条方法
-    deletebyId(id){
+    deletebyId(id) {
       // 发起请求
-      this.$http.delete("/orgEmployee/"+id)
-          .then(res =>{
+      this.$http.delete("/role/" + id)
+          .then(res => {
             res = res.data
-            if (res.success){
-              this.$message({ message: '删除成功', type: 'success' });
-              this.listLoading = false; // 加载框666666666
+            if (res.success) {
+              this.$message({message: '删除成功', type: 'success'});
+              this.listLoading = false; // 加载框
               this.queryData.currentPage = 1
-
-
-              this.getOrgemployee()
-            }else{
+              this.getRoles()
+            } else {
               this.$message.error("网络异常请联系管理员");
             }
           })
-          .catch(res =>{
+          .catch(res => {
           })
     },
     //显示编辑界面
     handleEdit: function (index, row) {
       this.saveFormVisible = true;
-
       var assign = Object.assign({}, row);
       this.saveForm = assign;
-      if(!assign.parent){
-        this.saveForm.parent = {name:"",id:null}
+      if (!assign.parent) {
+        this.saveForm.parent = {name: "", id: null}
       }
-      if(!assign.manager){
-        this.saveForm.manager = {username:"",id:null}
+      if (!assign.manager) {
+        this.saveForm.manager = {username: "", id: null}
       }
       // 父级部门回显
+      console.log();
       if(this.saveForm.parent){
         var split = this.saveForm.path.split("/");
         var parents = []
@@ -331,29 +274,32 @@ export default {
         }
         this.saveForm.parent = parents
       }
-      this.getAllEmployee()
-      this.getDeptTree()
+      // 查询主管列表
+      this.getRoles();
+      // 查询上级部门列表
+      this.getParents();
     },
     //显示新增界面
     handleAdd: function () {
       this.saveFormVisible = true;
-
       this.saveForm = {
-        id:null,
-        name:"",
-        intro:"",
-        manager:{
-          id:null,
-          username:""
+        id: null,
+        name: "",
+        intro: "",
+        manager: {
+          id: null,
+          username: ""
         },
-        parent:{
-          id:null,
-          name:""
+        parent: {
+          id: null,
+          name: ""
         },
-        state:""
+        state: ""
       };
-      this.getAllEmployee()
-      this.getDeptTree()
+      // 查询主管列表
+      this.getRoles();
+      // 查询上级部门列表
+      this.getParents();
     },
     //编辑
     editSubmit: function () {
@@ -372,8 +318,8 @@ export default {
                 type: 'success'
               });
               this.$refs['editForm'].resetFields();
-              this.saveFormVisible = false;
-              this.getOrgemployee();
+              this.editFormVisible = false;
+              this.getRoles();
             });
           });
         }
@@ -392,7 +338,7 @@ export default {
       });
     },
     // 新增或者是修改的方法
-    saveOrUpdate(){
+    saveOrUpdate() {
       var parent = this.saveForm.parent;
       if (parent){
         this.saveForm.parent = {
@@ -404,29 +350,29 @@ export default {
         }
       }
 
-      this.$http.put("/orgEmployee",this.saveForm)
-          .then(res =>{
+      this.$http.put("/role", this.saveForm)
+          .then(res => {
             res = res.data
-            if (res.success){
-              this.$message({ message: '保存成功', type: 'success' });
+            if (res.success) {
+              this.$message({message: '保存成功', type: 'success'});
               this.queryData.currentPage = 1
-              this.getOrgemployee()
+              this.getRoles()
               this.saveFormVisible = false;
               this.addLoading = false
-            }else{
+            } else {
               this.$message.error("网络异常请联系管理员");
             }
           })
-          .catch(res =>{
-
+          .catch(res => {
           })
     },
     selsChange: function (sels) {
-      var ids = sels.map(x =>  x.id)
+      var ids = sels.map(x => x.id)
       this.sels = ids;
     },
     //批量删除
     batchRemove: function () {
+      var ids = this.sels.map(item => item.id).toString();
       this.$confirm('确认删除选中记录吗？', '提示', {
         type: 'warning'
       }).then(() => {
@@ -435,33 +381,34 @@ export default {
 
         // 批量删除的方法
         this.batchDelete()
-
       }).catch(() => {
 
       });
     },
-    batchDelete(){
+    batchDelete() {
+      console.log(this.sels)
       // 发起请求
-      this.$http.patch("/orgEmployee",this.sels)
-          .then(res =>{
+      this.$http.patch("/role", this.sels)
+          .then(res => {
             res = res.data
-            if (res.success){
-              this.$message({ message: '删除成功', type: 'success' });
+            if (res.success) {
+              this.$message({message: '删除成功', type: 'success'});
               this.listLoading = false; // 加载框
               this.queryData.currentPage = 1
-              this.getOrgemployee()
-            }else{
+              this.getRoles()
+            } else {
               this.$message.error("网络异常请联系管理员");
             }
           })
-          .catch(res =>{
+          .catch(res => {
           })
     }
   },
 
   mounted() {
-    this.getOrgemployee();
+    this.getRoles();
   }
+
 }
 
 </script>

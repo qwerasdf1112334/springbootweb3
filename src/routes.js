@@ -12,6 +12,8 @@ import echarts from './views/charts/echarts.vue'
 // 导入自己的组件
 import Department from "./views/org/Department";
 import OrgEmployee from "./views/org/OrgEmployee";
+import Permission from "./views/auth/Permission";
+import Role from "./views/auth/Role";
 
 let routes = [
     {
@@ -50,13 +52,12 @@ let routes = [
     {
         path: '/',
         component: Home,
-        name: '导航一',
+        name: '权限管理',
         iconCls: 'el-icon-message',//图标样式class
         children: [
-            { path: '/main', component: Main, name: '主页', hidden: true },
-            { path: '/table', component: Table, name: 'Table' },
-            { path: '/form', component: Form, name: 'Form' },
-            { path: '/user', component: user, name: '列表' },
+            { path: '/permission', component: Permission, name: '权限管理' },
+            { path: '/role', component: Role, name: '角色管理' },
+
         ]
     },
     {
