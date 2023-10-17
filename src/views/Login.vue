@@ -2,10 +2,10 @@
   <el-form :model="ruleForm2" :rules="rules2" ref="ruleForm2" label-position="left" label-width="0px" class="demo-ruleForm login-container">
     <h3 class="title">系统登录</h3>
     <el-form-item prop="account">
-      <el-input type="text" v-model="ruleForm2.account" auto-complete="off" placeholder="账号"></el-input>
+      <el-input type="text" v-model="ruleForm2.username" auto-complete="off" placeholder="账号"></el-input>
     </el-form-item>
     <el-form-item prop="checkPass">
-      <el-input type="password" v-model="ruleForm2.checkPass" auto-complete="off" placeholder="密码"></el-input>
+      <el-input type="password" v-model="ruleForm2.password" auto-complete="off" placeholder="密码"></el-input>
     </el-form-item>
     <el-checkbox v-model="checked" checked class="remember">记住密码</el-checkbox>
     <el-form-item style="width:100%;">
@@ -23,8 +23,8 @@
       return {
         logining: false,
         ruleForm2: {
-          account: 'admin',
-          checkPass: '123456'
+          username: 'admin',
+          password: '123456'
         },
         rules2: {
           account: [
@@ -45,7 +45,16 @@
       },
       handleSubmit2(ev) {
         var _this = this;
-        this.$router.push({ path: '/echarts' });
+        this.$http.put("/login",this.ruleForm2).then(res=>{
+          if (res.data.success) {
+            console.log(res.data)
+            localStorage.setItem("user",JSON.stringify(res.data.data))
+            this.$router.push({ path: '/echarts' });
+          }
+        }).catch(res=>{
+
+        })
+
         /*this.$refs.ruleForm2.validate((valid) => {
           if (valid) {
             //_this.$router.replace('/table');

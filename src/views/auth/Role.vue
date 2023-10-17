@@ -53,9 +53,10 @@
 
 
 
-      <el-table-column label="操作" width="150">
+      <el-table-column label="操作" width="250">
         <template slot-scope="scope">
           <el-button size="small" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+          <el-button size="small" type="warning" @click="handleAuth(scope.$index, scope.row)">授权</el-button>
           <el-button type="danger" size="small" @click="handleDel(scope.$index, scope.row)">删除</el-button>
         </template>
       </el-table-column>
@@ -124,6 +125,27 @@
         <el-button type="primary" @click.native="addSubmit" :loading="addLoading">提交</el-button>
       </div>
     </el-dialog>
+
+    <!-- 授权框 -->
+    <el-dialog title="授权" :visible.sync="handleAuthFormVisible" :close-on-click-modal="false">
+      <el-form :model="authForm" label-width="80px" >
+        <el-tree
+            :data="permissionTree"
+            show-checkbox
+            default-expand-all
+            node-key="id"
+            ref="tree"
+            lazy
+            :props="defaultProps"
+        ></el-tree>
+      </el-form>
+
+
+      <div slot="footer" class="dialog-footer">
+        <el-button @click.native="handleAuthFormVisible = false">取消</el-button>
+        <el-button type="primary" @click.native="getCheckedNodes" :loading="addLoading">提交</el-button>
+      </div>
+    </el-dialog>
   </section>
 </template>
 
@@ -136,6 +158,18 @@
 export default {
   data() {
     return {
+      defaultProps:{
+        children: 'children',
+        label: 'name'
+      },
+      permissionTree:[],
+      rolePermissionIds:[],
+      //授权框
+      handleAuthFormVisible:false,
+      authForm:{
+        roleId:null,
+        permissionList:[],
+      },
       queryData: {
         keyword: '',
         pageSize: 10,
@@ -187,6 +221,60 @@ export default {
     }
   },
   methods: {
+
+    // 保存权限数据
+    getCheckedNodes(){
+      this.authForm.permissionList =  this.$refs.tree.getCheckedNodes()
+      this.$http.put("/role/permission",this.authForm)
+          .then(res => {
+            res = res.data
+            if (res.success){
+
+              this.handleAuthFormVisible = false
+              this.$message({message: '授权成功', type: 'success'});
+              this.getRoles();
+            }
+          })
+          .catch(res => {
+          })
+    },
+
+    //显示授权框
+    handleAuth(index,row){
+      this.authForm.roleId=row.id;
+      this.getPermissionTree();
+      this.handleAuthFormVisible=true;
+      this.queryRolePermissionIds(row.id)
+
+        this.$refs.tree.setCheckedKeys(this.rolePermissionIds);
+
+
+    },    // 获取权限树
+    getPermissionTree(){
+      this.$http.get("/permission")
+          .then(res => {
+            res = res.data
+            if (res.success){
+
+              this.permissionTree = res.data
+            }
+          })
+          .catch(res => {
+          })
+    },
+    // 查询角色所对应的权限的 id
+    queryRolePermissionIds(id){
+      this.$http.get("role/permission/"+id)
+          .then(res => {
+            res = res.data
+            if (res.success){
+
+              this.rolePermissionIds = res.data
+            }
+          })
+          .catch(res => {
+          })
+    },
     // 获取上级部门列表
     getParents(){
       this.$http.get("/role/parent")
@@ -407,6 +495,11 @@ export default {
 
   mounted() {
     this.getRoles();
+    this.$refs.tree.setCheckedKeys(this.rolePermissionIds);
+    this.$nextTick(() => {
+      // 在$nextTick中调用$refs，确保DOM更新完成
+      this.$refs.tree.setCheckedKeys(this.rolePermissionIds);
+    });
   }
 
 }
