@@ -47,8 +47,9 @@
         var _this = this;
         this.$http.put("/login",this.ruleForm2).then(res=>{
           if (res.data.success) {
-            console.log(res.data)
-            localStorage.setItem("user",JSON.stringify(res.data.data))
+            console.log(res.data.data+"==========")
+            localStorage.setItem("token", res.data.data.token);
+            localStorage.setItem("user",JSON.stringify(res.data.data.user))
             this.$router.push({ path: '/echarts' });
           }
         }).catch(res=>{

@@ -14,6 +14,8 @@ import Department from "./views/org/Department";
 import OrgEmployee from "./views/org/OrgEmployee";
 import Permission from "./views/auth/Permission";
 import Role from "./views/auth/Role";
+import NotPermission from "./views/403"
+
 
 let routes = [
     {
@@ -23,7 +25,8 @@ let routes = [
         iconCls: 'fa fa-bar-chart',
         leaf: true,
         children: [
-            { path: '/echarts', component: echarts, name: '首页' }
+            { path: '/echarts', component: echarts, name: '首页' },
+            { path: '/403', component: NotPermission, name: '无权限访问' ,hidden:true }
         ]
     },
     {
