@@ -48,7 +48,7 @@ let routes = [
         name: '组织机构管理',
         iconCls: 'el-icon-message',//图标样式class
         children: [
-            { path: '/department', component: Department, name: '部门管理' },
+            { path: '/dept', component: Department, name: '部门管理' },
             { path: '/orgEmployee', component: OrgEmployee, name: '员工管理' },
         ]
     },
