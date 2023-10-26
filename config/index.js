@@ -7,7 +7,8 @@ module.exports = {
     index: path.resolve(__dirname, '../dist/index.html'),
     assetsRoot: path.resolve(__dirname, '../dist'),
     assetsSubDirectory: 'static',
-    assetsPublicPath: '/vue-admin/',
+    //assetsPublicPath: '/vue-admin/',
+    assetsPublicPath: '',
     productionSourceMap: true,
     // Gzip off by default as many popular static hosts such as
     // Surge or Netlify already gzip all static assets for you.
@@ -28,13 +29,13 @@ module.exports = {
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
     proxyTable: {
-      '/api': {	//所有以api开头的url都代理给下面的地址
-        target: 'http://localhost:8080',	//所有以api开头的请求，都代理给 http://localhost:80
-        changeOrigin: true,
-        pathRewrite: {	//路径重新
-          '^/api': '' // 当请求的地址中有api开头，会去掉api吧请求定向到  http://localhost:80 后台地址
-        }
-      },
+      // '/api': {	//所有以api开头的url都代理给下面的地址
+      //   target: 'http://localhost:8080',	//所有以api开头的请求，都代理给 http://localhost:80
+      //   changeOrigin: true,
+      //   pathRewrite: {	//路径重新
+      //     '^/api': '' // 当请求的地址中有api开头，会去掉api吧请求定向到  http://localhost:80 后台地址
+      //   }
+      // },
     },
     // CSS Sourcemaps off by default because relative paths are "buggy"
     // with this option, according to the CSS-Loader README
